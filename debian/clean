@@ -1,0 +1,16 @@
+build/
+test/
+qb64
+internal/temp/
+internal/c/libqb/os/lnx/*.o
+internal/c/parts/audio/conversion/os/lnx/src.a
+internal/c/parts/audio/conversion/os/lnx/temp/resample.o
+internal/c/parts/audio/decode/mp3_mini/os/lnx/src.a
+internal/c/parts/audio/decode/mp3_mini/os/lnx/temp/minimp3.o
+internal/c/parts/audio/decode/ogg/os/lnx/src.o
+internal/c/parts/audio/out/os/lnx/src.a
+internal/c/parts/input/game_controller/os/lnx/src.a
+internal/c/parts/input/game_controller/os/lnx/temp/Gamepad_linux.o
+internal/c/parts/input/game_controller/os/lnx/temp/Gamepad_private.o
+internal/c/parts/core/os/lnx/*.a
+internal/config.txt

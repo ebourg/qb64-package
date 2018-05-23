@@ -1,0 +1,33 @@
+Source: qb64
+Section: devel
+Priority: optional
+Maintainer: Emmanuel Bourg <ebourg@apache.org>
+Build-Depends:
+ debhelper (>= 11),
+ freeglut3-dev,
+ libfreetype6-dev,
+ libglew-dev,
+ libglu1-mesa-dev,
+ libopenal-dev,
+ mesa-common-dev
+Standards-Version: 4.1.4
+Vcs-Git: https://salsa.debian.org/debian/qb64.git
+Vcs-Browser: https://salsa.debian.org/debian/qb64
+Homepage: https://www.qb64.net
+
+Package: qb64
+Architecture: any
+Depends:
+ freeglut3-dev,
+ libfreetype6-dev,
+ libglew-dev,
+ libglu1-mesa-dev,
+ libopenal-dev,
+ mesa-common-dev,
+ ${misc:Depends},
+ ${shlibs:Depends}
+Description: Quick Basic Programming Language
+ QB64 is a modern version of the Basic programming language that allows
+ programs created using Quick Basic 4.5 or Qbasic to run on modern operating
+ systems. It works on 32 or 64 bit machines and has many new features such
+ as stereo sound, improved graphics and TCP/IP internet capabilities.

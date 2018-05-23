@@ -1,0 +1,5 @@
+qb64 (1.2-1) unstable; urgency=medium
+
+  * Initial release. (Closes: #899414)
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Thu, 24 May 2018 00:07:25 +0200

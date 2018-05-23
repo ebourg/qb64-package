@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=QB64 Programming IDE
+GenericName=Quick Basic Development Environment
+Exec=/usr/bin/qb64
+Icon=/usr/share/qb64/qb64icon32.png
+Terminal=false
+Type=Application
+Categories=Development;IDE;
+Path=/var/lib/qb64/
+StartupNotify=false
+Keywords=Basic;IDE

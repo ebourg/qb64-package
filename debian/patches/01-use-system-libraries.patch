@@ -1,0 +1,216 @@
+Description: Build with the system libraries
+Author: Emmanuel Bourg <ebourg@apache.org>
+Forwarded: no
+--- a/internal/c/parts/core/src.c
++++ b/internal/c/parts/core/src.c
+@@ -1,5 +1,5 @@
+ #ifndef QB64_GLES
+- #include "glew/include/GL/glew.h"
++ #include "GL/glew.h"
+ #endif
+ 
+ #ifdef QB64_MACOSX
+@@ -10,5 +10,5 @@
+  #include <GLUT/glut.h>
+ #else
+  #define CORE_FREEGLUT
+- #include "src/freeglut.h"
++ #include "GL/freeglut.h"
+ #endif
+--- a/internal/c/parts/video/font/ttf/src.c
++++ b/internal/c/parts/video/font/ttf/src.c
+@@ -19,7 +19,8 @@
+ #ifdef QB64_BACKSLASH_FILESYSTEM
+  #include "src\\freetypeamalgam.h"
+ #else
+- #include "src/freetypeamalgam.h"
++ #include "ft2build.h"
++ #include FT_FREETYPE_H
+ #endif
+ FT_Library ft_library;
+ 
+--- a/internal/c/libqb.cpp
++++ b/internal/c/libqb.cpp
+@@ -2,7 +2,7 @@
+ #include "libqb.h"
+ 
+ #ifdef QB64_GUI
+- #include "parts/core/glew/src/glew.c"
++ #include "GL/glew.h"
+ #endif
+ 
+ #ifdef QB64_WINDOWS
+--- a/internal/c/makeline_lnx.txt
++++ b/internal/c/makeline_lnx.txt
+@@ -1,2 +1,2 @@
+-g++ -w qbx.cpp parts/core/os/lnx/src.a -lGL -lGLU -lX11 -lpthread -ldl -lrt -D FREEGLUT_STATIC -o 
++g++ -w qbx.cpp -lglut -lGLEW -lGL -lGLU -lX11 -lpthread -ldl -lrt -D FREEGLUT_STATIC -o 
+ 
+--- a/internal/c/common.h
++++ b/internal/c/common.h
+@@ -96,7 +96,7 @@
+ 
+ #ifdef QB64_GUI
+ #ifdef QB64_GLUT
+-#include "parts/core/gl_headers/opengl_org_registery/glext.h"
++#include "GL/glext.h"
+ #endif
+ #endif
+ 
+--- a/internal/source/main.txt
++++ b/internal/source/main.txt
+@@ -49007,11 +49007,10 @@
+ if(!qbevent)break;evnt(11797);}while(r);
+ }
+ do{
+-qbs_set(__STRING_DEFINES,qbs_add(qbs_add(__STRING_DEFINES,__STRING_DEFINES_HEADER),qbs_new_txt_len("DEPENDENCY_LOADFONT",19)));
++qbs_set(__STRING_DEFINES,qbs_add(qbs_add(__STRING_DEFINES,__STRING_DEFINES_HEADER),qbs_new_txt_len("DEPENDENCY_LOADFONT -I/usr/include/freetype2 -lfreetype",55)));
+ qbs_cleanup(qbs_tmp_base,0);
+ if(!qbevent)break;evnt(11799);}while(r);
+ do{
+-qbs_set(__STRING_LIBS,qbs_add(qbs_add(qbs_add(qbs_add(__STRING_LIBS,qbs_new_txt_len(" ",1)),qbs_new_txt_len("parts\\video\\font\\ttf\\os\\",24)),__STRING_O),qbs_new_txt_len("\\src.o",6)));
+ qbs_cleanup(qbs_tmp_base,0);
+ if(!qbevent)break;evnt(11800);}while(r);
+ }
+--- a/source/qb64.bas
++++ b/source/qb64.bas
+@@ -11796,8 +11796,7 @@
+     IF _FILEEXISTS(d$ + "os\" + o$ + "\src.o") = 0 THEN
+         Build d$ + "os\" + o$
+     END IF
+-    defines$ = defines$ + defines_header$ + "DEPENDENCY_LOADFONT"
+-    libs$ = libs$ + " " + "parts\video\font\ttf\os\" + o$ + "\src.o"
++    defines$ = defines$ + defines_header$ + "DEPENDENCY_LOADFONT -I/usr/include/freetype2 -lfreetype"
+ END IF
+ 
+ localpath$ = "internal\c\"
+@@ -11852,7 +11851,7 @@
+ END IF
+ 
+ IF DEPENDENCY(DEPENDENCY_AUDIO_OUT) THEN
+-    defines$ = defines$ + defines_header$ + "DEPENDENCY_AUDIO_OUT"
++    defines$ = defines$ + defines_header$ + "DEPENDENCY_AUDIO_OUT -lopenal"
+     d1$ = "parts\audio\out"
+     d2$ = d1$ + "\os\" + o$
+     d3$ = "internal\c\" + d2$
+--- a/internal/c/parts/audio/decode/mp3_mini/src/minimp3.c
++++ b/internal/c/parts/audio/decode/mp3_mini/src/minimp3.c
+@@ -21,7 +21,25 @@
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+  */
+ 
+-#include "libc.h"
++#define libc_malloc  malloc
++#define libc_calloc  calloc
++#define libc_realloc realloc
++#define libc_free    free
++
++#define libc_memset  memset
++#define libc_memcpy  memcpy
++#define libc_memmove memmove
++
++#define libc_frexp   frexp
++#define libc_exp     exp
++#define libc_pow     pow
++
++#define INLINE inline
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <math.h>
+ #include "minimp3.h"
+ 
+ #define MP3_FRAME_SIZE 1152
+--- a/internal/c/parts/core/os/lnx/build.sh
++++ b/internal/c/parts/core/os/lnx/build.sh
+@@ -1,29 +1,5 @@
+ #!/bin/sh
+-gcc -s -O2 -c ../../src/freeglut_callbacks.c -o temp/freeglut_callbacks.o
+-gcc -s -O2 -c ../../src/freeglut_cursor.c -o temp/freeglut_cursor.o
+-gcc -s -O2 -c ../../src/freeglut_display.c -o temp/freeglut_display.o
+-gcc -s -O2 -c ../../src/freeglut_ext.c -o temp/freeglut_ext.o
+-gcc -s -O2 -c ../../src/freeglut_font.c -o temp/freeglut_font.o
+-gcc -s -O2 -c ../../src/freeglut_font_data.c -o temp/freeglut_font_data.o
+-gcc -s -O2 -c ../../src/freeglut_gamemode.c -o temp/freeglut_gamemode.o
+-gcc -s -O2 -c ../../src/freeglut_geometry.c -o temp/freeglut_geometry.o
+-gcc -s -O2 -c ../../src/freeglut_glutfont_definitions.c -o temp/freeglut_glutfont_definitions.o
+-gcc -s -O2 -c ../../src/freeglut_init.c -o temp/freeglut_init.o
+-gcc -s -O2 -c ../../src/freeglut_input_devices.c -o temp/freeglut_input_devices.o
+-gcc -s -O2 -c ../../src/freeglut_joystick.c -o temp/freeglut_joystick.o
+-gcc -s -O2 -c ../../src/freeglut_main.c -o temp/freeglut_main.o
+-gcc -s -O2 -c ../../src/freeglut_menu.c -o temp/freeglut_menu.o
+-gcc -s -O2 -c ../../src/freeglut_misc.c -o temp/freeglut_misc.o
+-gcc -s -O2 -c ../../src/freeglut_overlay.c -o temp/freeglut_overlay.o
+-gcc -s -O2 -c ../../src/freeglut_spaceball.c -o temp/freeglut_spaceball.o
+-gcc -s -O2 -c ../../src/freeglut_state.c -o temp/freeglut_state.o
+-gcc -s -O2 -c ../../src/freeglut_stroke_mono_roman.c -o temp/freeglut_stroke_mono_roman.o
+-gcc -s -O2 -c ../../src/freeglut_stroke_roman.c -o temp/freeglut_stroke_roman.o
+-gcc -s -O2 -c ../../src/freeglut_structure.c -o temp/freeglut_structure.o
+-gcc -s -O2 -c ../../src/freeglut_videoresize.c -o temp/freeglut_videoresize.o
+-gcc -s -O2 -c ../../src/freeglut_window.c -o temp/freeglut_window.o
+-gcc -s -O2 -c ../../src/freeglut_xinput.c -o temp/freeglut_xinput.o
+-ar rcs src.a temp/freeglut_callbacks.o temp/freeglut_cursor.o temp/freeglut_display.o temp/freeglut_ext.o temp/freeglut_font.o temp/freeglut_font_data.o temp/freeglut_gamemode.o temp/freeglut_geometry.o temp/freeglut_glutfont_definitions.o temp/freeglut_init.o temp/freeglut_input_devices.o temp/freeglut_joystick.o temp/freeglut_main.o temp/freeglut_menu.o temp/freeglut_misc.o temp/freeglut_overlay.o temp/freeglut_spaceball.o temp/freeglut_state.o temp/freeglut_stroke_mono_roman.o temp/freeglut_stroke_roman.o temp/freeglut_structure.o temp/freeglut_videoresize.o temp/freeglut_window.o temp/freeglut_xinput.o
++ar rcs src.a
+ echo "Press any key to continue..."
+ Pause()
+ {
+--- a/internal/c/parts/audio/out/os/lnx/build.sh
++++ b/internal/c/parts/audio/out/os/lnx/build.sh
+@@ -1,33 +1,5 @@
+ #!/bin/sh
+-gcc -s -c -w -Wall ../../src/helpers.c -D AL_LIBTYPE_STATIC -o temp/helpers.o
+-gcc -s -c -w -Wall ../../src/bs2b.c -D AL_LIBTYPE_STATIC -o temp/bs2b.o
+-gcc -s -c -w -Wall ../../src/alAuxEffectSlot.c -D AL_LIBTYPE_STATIC -o temp/alAuxEffectSlot.o
+-gcc -s -c -w -Wall ../../src/alBuffer.c -D AL_LIBTYPE_STATIC -o temp/alBuffer.o
+-gcc -s -c -w -Wall ../../src/ALc.c -D AL_LIBTYPE_STATIC -o temp/ALc.o
+-gcc -s -c -w -Wall ../../src/alcConfig.c -D AL_LIBTYPE_STATIC -o temp/alcConfig.o
+-gcc -s -c -w -Wall ../../src/alcDedicated.c -D AL_LIBTYPE_STATIC -o temp/alcDedicated.o
+-gcc -s -c -w -Wall ../../src/alcEcho.c -D AL_LIBTYPE_STATIC -o temp/alcEcho.o
+-gcc -s -c -w -Wall ../../src/alcModulator.c -D AL_LIBTYPE_STATIC -o temp/alcModulator.o
+-gcc -s -c -w -Wall ../../src/alcReverb.c -D AL_LIBTYPE_STATIC -o temp/alcReverb.o
+-gcc -s -c -w -Wall ../../src/alcRing.c -D AL_LIBTYPE_STATIC -o temp/alcRing.o
+-gcc -s -c -w -Wall ../../src/alcThread.c -D AL_LIBTYPE_STATIC -o temp/alcThread.o
+-gcc -s -c -w -Wall ../../src/alEffect.c -D AL_LIBTYPE_STATIC -o temp/alEffect.o
+-gcc -s -c -w -Wall ../../src/alError.c -D AL_LIBTYPE_STATIC -o temp/alError.o
+-gcc -s -c -w -Wall ../../src/alExtension.c -D AL_LIBTYPE_STATIC -o temp/alExtension.o
+-gcc -s -c -w -Wall ../../src/alFilter.c -D AL_LIBTYPE_STATIC -o temp/alFilter.o
+-gcc -s -c -w -Wall ../../src/alListener.c -D AL_LIBTYPE_STATIC -o temp/alListener.o
+-gcc -s -c -w -Wall ../../src/alsa.c -D AL_LIBTYPE_STATIC -o temp/alsa.o
+-gcc -s -c -w -Wall ../../src/alSource.c -D AL_LIBTYPE_STATIC -o temp/alSource.o
+-gcc -s -c -w -Wall ../../src/alState.c -D AL_LIBTYPE_STATIC -o temp/alState.o
+-gcc -s -c -w -Wall ../../src/alThunk.c -D AL_LIBTYPE_STATIC -o temp/alThunk.o
+-gcc -s -c -w -Wall ../../src/ALu.c -D AL_LIBTYPE_STATIC -o temp/ALu.o
+-gcc -s -c -w -Wall ../../src/hrtf.c -D AL_LIBTYPE_STATIC -o temp/hrtf.o
+-gcc -s -c -w -Wall ../../src/loopback.c -D AL_LIBTYPE_STATIC -o temp/loopback.o
+-gcc -s -c -w -Wall ../../src/mixer.c -D AL_LIBTYPE_STATIC -o temp/mixer.o
+-gcc -s -c -w -Wall ../../src/null.c -D AL_LIBTYPE_STATIC -o temp/null.o
+-gcc -s -c -w -Wall ../../src/panning.c -D AL_LIBTYPE_STATIC -o temp/panning.o
+-gcc -s -c -w -Wall ../../src/wave.c -D AL_LIBTYPE_STATIC -o temp/wave.o
+-ar rcs src.a temp/alAuxEffectSlot.o temp/alBuffer.o temp/ALc.o temp/alcConfig.o temp/alcDedicated.o temp/alcEcho.o temp/alcModulator.o temp/alcReverb.o temp/alcRing.o temp/alcThread.o temp/alEffect.o temp/alError.o temp/alExtension.o temp/alFilter.o temp/alListener.o temp/alsa.o temp/alSource.o temp/alState.o temp/alThunk.o temp/ALu.o temp/hrtf.o temp/loopback.o temp/mixer.o temp/null.o temp/panning.o temp/wave.o temp/helpers.o temp/bs2b.o
++ar rcs src.a
+ echo "Press any key to continue..."
+ Pause()
+ {
+@@ -42,21 +14,3 @@
+ Pause
+ Pause
+ 
+-####Compiled but unrequired (using ALSA instead)####
+-gcc -s -c -w -Wall ../../src/oss.c -D AL_LIBTYPE_STATIC -o temp/oss.o
+-temp/oss.o
+-gcc -s -c -w -Wall ../../src/pulseaudio.c -D AL_LIBTYPE_STATIC -o temp/pulseaudio.o
+-temp/pulseaudio.o
+-
+-####These all failed to compile in Ubuntu####
+-gcc -s -c -w -Wall ../../src/solaris.c -D AL_LIBTYPE_STATIC -o temp/solaris.o
+-gcc -s -c -w -Wall ../../src/sndio.c -D AL_LIBTYPE_STATIC -o temp/sndio.o
+-gcc -s -c -w -Wall ../../src/portaudio.c -D AL_LIBTYPE_STATIC -o temp/portaudio.o
+-gcc -s -c -w -Wall ../../src/coreaudio.c -D AL_LIBTYPE_STATIC -o temp/coreaudio.o
+-gcc -s -c -w -Wall ../../src/opensl.c -D AL_LIBTYPE_STATIC -o temp/opensl.o
+-
+-####These are Windows specific####
+-gcc -s -c -w -Wall ../../src/dsound.c -D AL_LIBTYPE_STATIC -o temp/dsound.o
+-gcc -s -c -w -Wall ../../src/mmdevapi.c -D AL_LIBTYPE_STATIC -o temp/mmdevapi.o
+-gcc -s -c -w -Wall ../../src/winmm.c -D AL_LIBTYPE_STATIC -o temp/winmm.o
+-

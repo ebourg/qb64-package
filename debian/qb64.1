@@ -1,0 +1,64 @@
+.TH QB64 "1" "May 2018" "qb64 1.2" "User Commands"
+
+.SH NAME
+
+qb64 \- Modern Quick Basic IDE and compiler
+
+
+.SH DESCRIPTION
+
+QB64 is a modern version of the Basic programming language that allows programs
+created using Quick Basic 4.5 or Qbasic to run on modern operating systems. It
+will work on 32 or 64 bit machines and has many new features such as stereo
+sound, improved graphics and TCP/IP internet capabilities.
+
+QB64 is a compiler (C++ emitter) with an editor (IDE) that strives for 100%
+Qbasic and QuickBasic 4.5 compatibility. QB64 not only strives for 100% QB 4.5
+compatibility but also strives to extend the capabilities of QBasic to fit
+modern needs without changing the BASIC philosophy.
+
+
+.SH "USAGE"
+
+qb64 [switches] <inputs>
+
+The command has to be invoked from the installation directory (/var/lib/qb64).
+
+.SH "OPTIONS"
+
+.TP
+<file>
+Source file to load
+.TP
+\fB\-c\fR
+Compile instead of edit
+.TP
+\fB\-x\fR
+Compile instead of edit and output the result to the console
+.TP
+\fB\-p\fR
+Purge all pre\-compiled content first
+.TP
+\fB\-z\fR
+Generate C code without compiling to executable
+.TP
+\fB\-o\fR <file>
+Write output executable to <file>
+.TP
+\fB\-e\fR
+Enables OPTION _EXPLICIT, making variable declaration
+mandatory (per\-compilation; doesn't affect the
+source file or global settings)
+.TP
+\fB\-s[\fR:switch=true/false]
+View/edit compiler settings
+.TP
+\fB\-l\fR:<line number>
+Starts the IDE at the specified line number
+
+
+.SH "SEE ALSO"
+
+See the QB64 wiki for the detailed language reference:
+
+http://www.qb64.net/wiki/index.php/Keyword_Reference_-_By_usage

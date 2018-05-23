@@ -1,0 +1,60 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	mkdir -p build
+
+	# Build libqb
+	$(CXX) $(CFLAGS) $(CPPFLAGS) -g -c -w -Wall -fPIC internal/c/libqb.cpp -o build/libqb_setup.o \
+	        -D DEPENDENCY_LOADFONT -I/usr/include/freetype2 \
+	        -D FREEGLUT_STATIC
+
+	# Build the pre-generated compiler
+	mkdir internal/temp/
+	cp -r internal/source/* internal/temp/
+	$(CXX) -g -c -w -Wall -fPIC internal/c/qbx.cpp -o build/qbx.o
+	rm -f internal/temp/*
+	$(CXX) $(LDFLAGS) -g -w -Wall \
+	        build/qbx.o \
+	        build/libqb_setup.o \
+	        -lfreetype -lGL -lGLU -lGLEW -lX11 -lpthread -lrt -lglut \
+	        -o qb64
+
+	# Rebuild qb64.bas with the bootstrapped compiler
+	./qb64 -z source/qb64.bas
+	$(CXX) -g -c -w -Wall -fPIC internal/c/qbx.cpp -o build/qbx.o
+	$(CXX) $(LDFLAGS) -g -w -Wall \
+	        build/qbx.o \
+	        build/libqb_setup.o \
+	        -lfreetype -lGL -lGLU -lGLEW -lX11 -lpthread -lrt -lglut \
+	        -o qb64
+	rm -Rf internal/temp/*
+
+	rm internal/c/libqb/os/lnx/*.o
+	rm internal/c/parts/core/os/lnx/src.a
+
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	mkdir -p test
+
+	cp -Rp internal test/
+	cp -Rp source test/
+	cp qb64 test/
+
+	echo 'PRINT "Hello QB64!"' > test/test1.bas
+	./test/qb64 -x test1.bas
+
+	echo 'i& = _LOADIMAGE("debian.jpg")' > test/test2.bas
+	./test/qb64 -x test2.bas
+
+	echo '_SNDPLAYFILE "tada.wav"' > test/test3.bas
+	./test/qb64 -x test3.bas
+
+	echo 'f& =_LOADFONT("dejavu.ttf", 25)' > test/test4.bas
+	./test/qb64 -x test4.bas
+
+	echo 'devices = _DEVICES' > test/test5.bas
+	./test/qb64 -x test5.bas
+endif
