@@ -1,5 +1,12 @@
 debian/qb64.desktop             usr/share/applications
 internal                        var/lib/qb64/
-internal/source/qb64icon32.png	usr/share/qb64/
 programs                        var/lib/qb64/
 qb64                            usr/bin/
+
+# Icons
+debian/icons/qb64-32x32.png     usr/share/icons/hicolor/32x32/apps/
+debian/icons/qb64-64x64.png     usr/share/icons/hicolor/64x64/apps/
+debian/icons/qb64-128x128.png   usr/share/icons/hicolor/128x128/apps/
+debian/icons/qb64-256x256.png   usr/share/icons/hicolor/256x256/apps/
+debian/icons/qb64-512x512.png   usr/share/icons/hicolor/512x512/apps/
+debian/icons/qb64.svg           usr/share/icons/hicolor/scalable/apps/
