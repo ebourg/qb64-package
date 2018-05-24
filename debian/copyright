@@ -4,6 +4,7 @@ Source: https://github.com/Galleondragon/qb64
 Files-Excluded: .travis*
                 cyberbit.ttf
                 appveyor.yml
+                setup_lnx.sh
                 *.bat
                 internal/c/c_compiler
                 internal/c/parts/audio/decode/mp3_mini/download
