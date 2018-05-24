@@ -1,6 +1,7 @@
 debian/qb64.desktop             usr/share/applications
 internal                        var/lib/qb64/
 programs                        var/lib/qb64/
+source                          var/lib/qb64/
 qb64                            usr/bin/
 
 # Icons
